@@ -33,6 +33,18 @@ This project is a React + Express implementation of a video consultation app usi
 3. Run `npm run dev`.
 4. Open your browser at `http://localhost:3001`.
 
+## Screenshots
+
+### Join Interface
+Enter your name and room ID to join or create a meeting:
+
+![Join Interface](images/1.png)
+
+### Active Video Call
+Two-person video consultation in progress:
+
+![Video Call with 2 Participants](images/2.png)
+
 ## How it Works
 
 1. **Signaling**: When you enter a Room ID and click Join, the frontend calls the `/join` endpoint.
@@ -40,4 +52,4 @@ This project is a React + Express implementation of a video consultation app usi
 3. **Session Information**: The backend returns the `JoinInfo` (Meeting and Attendee data).
 4. **Media Session**: The frontend uses `amazon-chime-sdk-js` to initialize a `DefaultMeetingSession` and bind audio/video elements to the browser.
 5. **Direct Media**: Media flows through AWS Chime's media services (which includes built-in TURN relay), ensuring 100% connectivity even through firewalls.
-# Video-Call-App-via-AWS-Chime-SDK
+
