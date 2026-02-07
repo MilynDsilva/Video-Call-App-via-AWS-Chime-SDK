@@ -1,0 +1,13 @@
+*.conf
+*IGR.md
+*.env
+*.txt
+*ec2.sh
+*prod.yml
+node_modules
+*nginx.sh
+*version.sh
+*.bat
+*ecr.sh
+.env.production
+*.stackdump
