@@ -45,6 +45,7 @@ function App() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [attendeeRoster, setAttendeeRoster] = useState({});
     const [remoteAttendeeId, setRemoteAttendeeId] = useState(null);
+    const [notifications, setNotifications] = useState([]);
 
     const localVideoRef = useRef(null);
     const remoteVideoRef = useRef(null);
@@ -90,6 +91,17 @@ function App() {
             window.history.replaceState({}, '', newUrl);
         }
     }, [roomId, inCall]);
+
+    // Show notification helper
+    const showNotification = (message, type) => {
+        const id = Date.now();
+        setNotifications(prev => [...prev, { id, message, type }]);
+
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            setNotifications(prev => prev.filter(n => n.id !== id));
+        }, 3000);
+    };
 
     const handleCreateMeeting = async () => {
         if (!roomId) return alert('Enter a room ID first');
@@ -198,12 +210,24 @@ function App() {
                             const data = await response.json();
                             if (data.roster) {
                                 console.log('Updated roster:', data.roster);
+                                const attendeeName = data.roster[attendeeId] || 'Someone';
+
+                                // Don't show notification for yourself joining
+                                const myAttendeeId = joinInfo.Attendee.AttendeeId;
+                                if (attendeeId !== myAttendeeId) {
+                                    showNotification(`${attendeeName} joined`, 'join');
+                                }
+
                                 setAttendeeRoster(data.roster);
                             }
                         } catch (error) {
                             console.error('Failed to update roster:', error);
                         }
                     } else {
+                        // Get the name before removing from roster
+                        const leavingName = attendeeRoster[attendeeId] || 'Someone';
+                        showNotification(`${leavingName} left`, 'leave');
+
                         // Remove attendee from roster when they leave
                         setAttendeeRoster(prev => {
                             const updated = { ...prev };
@@ -328,6 +352,18 @@ function App() {
                         <p>Joining Meeting...</p>
                     </div>
                 )}
+
+                {/* Notification Toasts */}
+                <div className="notification-container">
+                    {notifications.map(notif => (
+                        <div
+                            key={notif.id}
+                            className={`notification ${notif.type}`}
+                        >
+                            {notif.message}
+                        </div>
+                    ))}
+                </div>
 
                 <div className="video-section">
                     <div className="video-grid">
