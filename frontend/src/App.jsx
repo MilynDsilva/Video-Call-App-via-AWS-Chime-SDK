@@ -186,6 +186,39 @@ function App() {
 
             const audioVideo = meetingSession.audioVideo;
 
+            // Attendee Presence Observer - Updates roster when attendees join/leave
+            const attendeePresenceObserver = {
+                attendeeIdPresenceHandler: async (attendeeId, present, externalUserId, dropped) => {
+                    console.log(`Attendee ${attendeeId} presence changed: ${present ? 'joined' : 'left'}`);
+
+                    if (present) {
+                        // When a new attendee joins, fetch the updated roster from backend
+                        try {
+                            const response = await fetch(`${API_URL}/api/roster/${encodeURIComponent(roomId)}`);
+                            const data = await response.json();
+                            if (data.roster) {
+                                console.log('Updated roster:', data.roster);
+                                setAttendeeRoster(data.roster);
+                            }
+                        } catch (error) {
+                            console.error('Failed to update roster:', error);
+                        }
+                    } else {
+                        // Remove attendee from roster when they leave
+                        setAttendeeRoster(prev => {
+                            const updated = { ...prev };
+                            delete updated[attendeeId];
+                            return updated;
+                        });
+                    }
+                }
+            };
+
+            // Subscribe to attendee presence updates
+            audioVideo.realtimeSubscribeToAttendeeIdPresence(
+                attendeePresenceObserver.attendeeIdPresenceHandler
+            );
+
             // Video Tile Observer
             const observer = {
                 videoTileDidUpdate: (tileState) => {

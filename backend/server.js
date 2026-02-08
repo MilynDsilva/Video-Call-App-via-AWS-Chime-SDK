@@ -181,6 +181,46 @@ app.post('/api/create', async (req, res) => {
 });
 
 /**
+ * GET /api/roster/:title - Get current attendee roster for a meeting
+ * 
+ * Retrieves the current list of attendees in a meeting without creating
+ * a new attendee. Used for real-time roster synchronization when new
+ * participants join.
+ * 
+ * @route GET /api/roster/:title
+ * @param {string} req.params.title - Meeting title/identifier
+ * 
+ * @returns {Object} 200 - Success response
+ * @returns {Object.<string, string>} 200.roster - Map of attendeeId to attendee name
+ * 
+ * @returns {Object} 404 - Meeting not found
+ * @returns {string} 404.error - Error message
+ * 
+ * @example
+ * // Request
+ * GET /api/roster/patient-doctor-consultation-123
+ * 
+ * // Response
+ * {
+ *   "roster": {
+ *     "xyz-456": "Dr. Smith",
+ *     "def-789": "Patient John"
+ *   }
+ * }
+ */
+app.get('/api/roster/:title', (req, res) => {
+    const { title } = req.params;
+    const meetingData = meetings[title];
+
+    if (!meetingData) {
+        return res.status(404).json({ error: 'Meeting not found' });
+    }
+
+    res.json({ roster: meetingData.attendees || {} });
+});
+
+
+/**
  * POST /api/join - Join an existing meeting or create and join a new one
  * 
  * Allows a user to join a Chime SDK meeting. If the meeting doesn't exist,
